@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>行程问题 · 调度台 — 3D讲解与题库系统</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0f1e;
+  --panel:#121a2e;
+  --panel2:#0d1424;
+  --line:#233150;
+  --line-soft:#1a2440;
+  --text:#e8ecf4;
+  --muted:#8592ad;
+  --amber:#f2a93c;
+  --amber-dim:#8a6a30;
+  --cyan:#59c3c3;
+  --cyan-dim:#3d6e6e;
+  --green:#7fd858;
+  --red:#e8615f;
+  --radius:14px;
+  --glow1:#16213d;
+  --glow2:#14203a;
+  --road-top:#1c2540;
+  --road-bottom:#10182c;
+  --road-stripe:rgba(255,255,255,.35);
+  --river-top:#123049;
+  --river-bottom:#0b1c2c;
+  --river-stripe:rgba(255,255,255,.12);
+  --tagbg-meet:#3a2f14; --tagfg-meet:var(--amber);
+  --tagbg-chase:#173636; --tagfg-chase:var(--cyan);
+  --tagbg-circle:#2a1f3d; --tagfg-circle:#b79cf0;
+  --tagbg-water:#123049; --tagfg-water:#7ec7f0;
+  --tagbg-mix:#3a1414; --tagfg-mix:#f0908c;
+  --chip-text-a:#1a1400;
+  --chip-text-b:#04211f;
+}
+body.theme-mono{
+  --bg:#fafafa;
+  --panel:#f0f0f0;
+  --panel2:#e6e6e6;
+  --line:#cfcfcf;
+  --line-soft:#d8d8d8;
+  --text:#111111;
+  --muted:#5c5c5c;
+  --amber:#111111;
+  --amber-dim:#4a4a4a;
+  --cyan:#3d3d3d;
+  --cyan-dim:#6e6e6e;
+  --green:#1a1a1a;
+  --red:#111111;
+  --glow1:#ececec;
+  --glow2:#e6e6e6;
+  --road-top:#3a3a3a;
+  --road-bottom:#1c1c1c;
+  --road-stripe:rgba(255,255,255,.55);
+  --river-top:#4a4a4a;
+  --river-bottom:#232323;
+  --river-stripe:rgba(255,255,255,.3);
+  --tagbg-meet:#111111; --tagfg-meet:#ffffff;
+  --tagbg-chase:#e2e2e2; --tagfg-chase:#111111;
+  --tagbg-circle:#111111; --tagfg-circle:#ffffff;
+  --tagbg-water:#e2e2e2; --tagfg-water:#111111;
+  --tagbg-mix:#111111; --tagfg-mix:#ffffff;
+  --chip-text-a:#ffffff;
+  --chip-text-b:#ffffff;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -10%, var(--glow1) 0%, transparent 60%),
+    radial-gradient(ellipse 800px 600px at 100% 10%, var(--glow2) 0%, transparent 55%),
+    var(--bg);
+  color:var(--text);
+  font-family:'Noto Sans SC', sans-serif;
+  line-height:1.7;
+  min-height:100vh;
+  transition:background .3s, color .3s;
+}
+.mono{font-family:'JetBrains Mono', monospace;}
+.serif{font-family:'Noto Serif SC', serif;}
+h1,h2,h3{font-family:'Noto Serif SC', serif;}
+::selection{background:var(--amber); color:var(--chip-text-a);}
+
+/* ---------- NAV ---------- */
+nav{
+  position:sticky; top:0; z-index:100;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 32px;
+  background:rgba(10,15,30,0.88);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex; align-items:center; gap:10px; font-family:'Noto Serif SC',serif; font-weight:700; font-size:1.05rem; letter-spacing:.5px;}
+.brand .dot{width:9px; height:9px; border-radius:50%; background:var(--amber); box-shadow:0 0 10px var(--amber);}
+.navlinks{display:flex; gap:6px;}
+.navlinks a{
+  color:var(--muted); text-decoration:none; font-size:.88rem; padding:8px 14px;
+  border-radius:8px; transition:all .2s; letter-spacing:.3px;
+}
+.navlinks a:hover{color:var(--text); background:var(--panel);}
+@media (max-width:720px){ .navlinks{display:none;} }
+
+/* ---------- HERO ---------- */
+.hero{
+  padding:72px 32px 40px; max-width:1180px; margin:0 auto;
+  display:grid; grid-template-columns:1.1fr 1fr; gap:48px; align-items:center;
+}
+@media (max-width:900px){ .hero{grid-template-columns:1fr; padding-top:44px;} }
+.eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  color:var(--amber); font-size:.78rem; letter-spacing:2px; font-weight:600;
+  border:1px solid var(--amber-dim); padding:5px 12px; border-radius:20px;
+  margin-bottom:20px;
+}
+.hero h1{font-size:3.2rem; font-weight:900; line-height:1.15; margin-bottom:14px;}
+.hero h1 em{font-style:normal; color:var(--amber);}
+.hero p.lead{color:var(--muted); font-size:1.05rem; max-width:46ch; margin-bottom:26px;}
+.hero .cta-row{display:flex; gap:12px; flex-wrap:wrap;}
+.btn{
+  display:inline-flex; align-items:center; gap:8px; cursor:pointer; border:none;
+  font-family:'Noto Sans SC',sans-serif; font-weight:700; font-size:.92rem;
+  padding:12px 22px; border-radius:10px; text-decoration:none; transition:transform .15s, box-shadow .15s;
+}
+.btn:hover{transform:translateY(-2px);}
+.btn-primary{background:var(--amber); color:var(--chip-text-a); box-shadow:0 6px 20px -6px rgba(242,169,60,.6);}
+.btn-ghost{background:transparent; color:var(--text); border:1px solid var(--line); }
+.btn-ghost:hover{border-color:var(--cyan);}
+
+/* ---------- ROAD / TRACK VISUAL (signature element) ---------- */
+.stage-wrap{
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  padding:18px 18px 14px; position:relative; overflow:hidden;
+}
+.stage-wrap::before{
+  content:''; position:absolute; inset:0;
+  background:repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,.02) 40px);
+  pointer-events:none;
+}
+.stage{
+  -webkit-perspective:600px; perspective:600px; perspective-origin:50% 20%; -webkit-perspective-origin:50% 20%;
+  height:190px; position:relative;
+}
+.road{
+  position:absolute; left:6%; right:6%; top:38%; height:60px;
+  -webkit-transform:rotateX(58deg); transform:rotateX(58deg);
+  -webkit-transform-style:preserve-3d; transform-style:preserve-3d;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 26px, var(--road-stripe) 26px 40px, transparent 40px 66px),
+    linear-gradient(180deg, var(--road-top), var(--road-bottom));
+  border-radius:4px;
+  box-shadow:0 30px 40px -10px rgba(0,0,0,.6);
+}
+.road.river{
+  background:
+    repeating-linear-gradient(90deg, var(--river-stripe) 0 3px, transparent 3px 46px),
+    linear-gradient(180deg, var(--river-top), var(--river-bottom));
+  animation:flow 1.6s linear infinite;
+}
+@keyframes flow{ from{background-position:0 0, 0 0;} to{background-position:-46px 0, 0 0;} }
+.milepost{
+  position:absolute; top:-22px; transform:translateX(-50%);
+  font-size:.62rem; color:var(--muted); text-align:center;
+}
+.milepost::after{
+  content:''; display:block; width:1px; height:8px; background:var(--line-soft); margin:2px auto 0;
+}
+.vehicle{
+  position:absolute; top:50%; width:34px; height:20px;
+  -webkit-transform:translate(-50%,-50%) rotateX(-58deg) translateZ(18px);
+  transform:translate(-50%,-50%) rotateX(-58deg) translateZ(18px);
+  -webkit-transform-style:preserve-3d; transform-style:preserve-3d;
+  border-radius:6px 6px 3px 3px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.62rem; font-weight:700; color:var(--chip-text-a);
+  box-shadow:0 6px 14px -4px rgba(0,0,0,.7);
+  will-change:left;
+}
+.vehicle::after{
+  content:''; position:absolute; bottom:-9px; left:50%; width:26px; height:6px;
+  background:radial-gradient(ellipse, rgba(0,0,0,.5), transparent 70%);
+  transform:translateX(-50%);
+}
+.v-a{background:var(--amber);}
+.v-b{background:var(--cyan);}
+.flag{
+  position:absolute; top:50%; width:2px; height:46px; background:var(--red);
+  -webkit-transform:translate(-50%,-100%) rotateX(-58deg);
+  transform:translate(-50%,-100%) rotateX(-58deg);
+}
+.flag::before{
+  content:'终'; position:absolute; top:-14px; left:2px; font-size:.6rem; color:var(--red); background:var(--panel); padding:0 2px; border-radius:3px;
+}
+
+/* mini concept demo (pure CSS loops) */
+.mini-stage{height:120px; position:relative; -webkit-perspective:500px; perspective:500px; perspective-origin:50% 10%; -webkit-perspective-origin:50% 10%;}
+.mini-road{
+  position:absolute; left:8%; right:8%; top:44%; height:44px;
+  -webkit-transform:rotateX(58deg); transform:rotateX(58deg);
+  background:repeating-linear-gradient(90deg, transparent 0 20px, var(--road-stripe) 20px 30px, transparent 30px 50px), linear-gradient(180deg,var(--road-top),var(--road-bottom));
+  border-radius:4px;
+}
+.mini-token{
+  position:absolute; top:50%; width:22px; height:14px; border-radius:5px;
+  -webkit-transform:translate(-50%,-50%) rotateX(-58deg) translateZ(10px);
+  transform:translate(-50%,-50%) rotateX(-58deg) translateZ(10px);
+}
+@keyframes meetDemo{
+  0%{left:4%;} 48%{left:47%;} 52%{left:47%;} 100%{left:4%;}
+}
+@keyframes meetDemoB{
+  0%{left:96%;} 48%{left:53%;} 52%{left:53%;} 100%{left:96%;}
+}
+@keyframes chaseDemoA{ 0%{left:2%;} 100%{left:88%;} }
+@keyframes chaseDemoB{ 0%{left:34%;} 100%{left:88%;} }
+.orbit-flat{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;}
+.orbit-oval{position:relative; width:78%; height:60%; transform:scaleY(0.42);}
+.orbit-ring{position:absolute; inset:0; border:2px dashed var(--line-soft); border-radius:50%;}
+.orbit-pivot{position:absolute; inset:0; transform-origin:50% 50%;}
+.orbit-pivot.a{animation:spin 3.2s linear infinite;}
+.orbit-pivot.b{animation:spin 4.6s linear infinite;}
+.orbit-token{position:absolute; left:50%; top:0; width:16px; height:16px; margin:-8px 0 0 -8px; border-radius:50%; transform:scaleY(2.38);}
+@keyframes spin{ to{transform:rotate(360deg);} }
+.water-lane{position:absolute; left:8%; right:8%; height:20px; border-radius:4px; overflow:hidden;}
+.water-lane .cur{position:absolute; inset:0; background:repeating-linear-gradient(90deg, rgba(255,255,255,.15) 0 3px, transparent 3px 30px); animation:flow 1s linear infinite;}
+@keyframes boatFast{ 0%{left:2%;} 100%{left:86%;} }
+@keyframes boatSlow{ 0%{left:2%;} 100%{left:86%;} }
+
+/* ---------- SECTIONS ---------- */
+section{max-width:1180px; margin:0 auto; padding:64px 32px;}
+.section-head{margin-bottom:36px; max-width:64ch;}
+.section-tag{color:var(--cyan); font-size:.78rem; letter-spacing:2px; font-weight:700; margin-bottom:8px;}
+.section-head h2{font-size:2rem; margin-bottom:10px;}
+.section-head p{color:var(--muted);}
+
+/* concept cards */
+.concept-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:20px;}
+@media (max-width:800px){ .concept-grid{grid-template-columns:1fr;} }
+.concept-card{
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  padding:20px 20px 8px; transition:border-color .2s;
+}
+.concept-card:hover{border-color:var(--amber-dim);}
+.concept-card .ch{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;}
+.concept-card h3{font-size:1.2rem;}
+.concept-card .formula{
+  font-family:'JetBrains Mono',monospace; font-size:.78rem; color:var(--amber);
+  background:var(--panel2); border:1px solid var(--line); padding:6px 10px; border-radius:6px; white-space:nowrap;
+}
+.concept-card p{color:var(--muted); font-size:.9rem; margin-bottom:10px;}
+
+/* method section */
+.method-steps{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:36px;}
+@media (max-width:900px){ .method-steps{grid-template-columns:repeat(2,1fr);} }
+.step-card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px;}
+.step-num{font-family:'JetBrains Mono',monospace; color:var(--amber-dim); font-size:.75rem; letter-spacing:1px;}
+.step-card h4{margin:6px 0 6px; font-size:1rem; font-family:'Noto Sans SC',sans-serif; font-weight:700;}
+.step-card p{color:var(--muted); font-size:.85rem;}
+
+.diagram-box{
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:24px;
+}
+.diagram-box h4{margin-bottom:14px; font-size:1rem;}
+.segbar{position:relative; height:40px; margin:16px 0 6px; border-radius:6px; overflow:hidden; display:flex;}
+.seg-a{background:var(--amber-dim); flex:1.6; display:flex; align-items:center; justify-content:center; font-size:.78rem; color:var(--chip-text-a); font-weight:700;}
+.seg-b{background:var(--cyan-dim); flex:1; display:flex; align-items:center; justify-content:center; font-size:.78rem; color:var(--chip-text-b); font-weight:700;}
+.segbar-label{display:flex; justify-content:space-between; font-size:.75rem; color:var(--muted); margin-bottom:20px;}
+.worked{margin-top:18px; border-top:1px solid var(--line); padding-top:16px;}
+.worked ol{padding-left:20px; color:var(--text); font-size:.92rem;}
+.worked li{margin-bottom:8px;}
+.worked .ans{color:var(--green); font-weight:700;}
+
+/* simulator */
+.sim-grid{display:grid; grid-template-columns:320px 1fr; gap:24px;}
+@media (max-width:900px){ .sim-grid{grid-template-columns:1fr;} }
+.sim-panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:20px;}
+.type-tabs{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;}
+.type-tab{
+  flex:1; min-width:70px; text-align:center; padding:9px 6px; border-radius:8px; cursor:pointer;
+  background:var(--panel2); border:1px solid var(--line); color:var(--muted); font-size:.82rem; font-weight:700;
+  transition:all .15s;
+}
+.type-tab.active{background:var(--amber); color:var(--chip-text-a); border-color:var(--amber);}
+.field{margin-bottom:14px;}
+.field label{display:block; font-size:.78rem; color:var(--muted); margin-bottom:5px;}
+.field input, .field select{
+  width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--text);
+  padding:9px 10px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:.9rem;
+}
+.field input:focus, .field select:focus{outline:none; border-color:var(--cyan);}
+.mode-toggle{display:flex; gap:8px; margin-bottom:14px;}
+.mode-toggle button{
+  flex:1; padding:8px; border-radius:8px; border:1px solid var(--line); background:var(--panel2);
+  color:var(--muted); font-size:.8rem; cursor:pointer;
+}
+.mode-toggle button.active{border-color:var(--cyan); color:var(--cyan);}
+.controls-row{display:flex; gap:10px; margin-top:6px;}
+.icon-btn{
+  flex:1; padding:10px; border-radius:8px; border:1px solid var(--line); background:var(--panel2);
+  color:var(--text); cursor:pointer; font-weight:700; font-size:.85rem;
+}
+.icon-btn:hover{border-color:var(--amber);}
+input[type=range]{-webkit-appearance:none; height:4px; background:var(--line); border-radius:2px; margin-top:8px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:var(--amber); cursor:pointer;}
+
+.readout{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px;
+}
+.readout .cell{background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:10px; text-align:center;}
+.readout .cell .k{font-size:.7rem; color:var(--muted); letter-spacing:.5px;}
+.readout .cell .v{font-family:'JetBrains Mono',monospace; font-size:1.1rem; font-weight:700; margin-top:2px;}
+.readout .cell .v.amber{color:var(--amber);}
+.readout .cell .v.cyan{color:var(--cyan);}
+.readout .cell .v.green{color:var(--green);}
+
+.formula-panel{
+  margin-top:18px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:14px 16px;
+  font-family:'JetBrains Mono',monospace; font-size:.85rem; color:var(--text); line-height:1.9;
+}
+.formula-panel .fa{color:var(--amber);}
+.formula-panel .fc{color:var(--cyan);}
+.formula-panel .fg{color:var(--green); font-weight:700;}
+
+/* bank */
+.bank-controls{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px; align-items:center; justify-content:space-between;}
+.filter-group{display:flex; flex-wrap:wrap; gap:6px;}
+.chip{
+  padding:7px 14px; border-radius:20px; border:1px solid var(--line); background:var(--panel);
+  color:var(--muted); font-size:.8rem; cursor:pointer; transition:all .15s;
+}
+.chip.active{background:var(--cyan); color:var(--chip-text-b); border-color:var(--cyan); font-weight:700;}
+.bank-list{display:flex; flex-direction:column; gap:12px;}
+.q-card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px 18px; cursor:pointer;}
+.q-card .qh{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+.qtag{
+  font-size:.68rem; padding:3px 9px; border-radius:20px; letter-spacing:.5px; white-space:nowrap; font-weight:700;
+}
+.tag-meet{background:var(--tagbg-meet); color:var(--tagfg-meet);}
+.tag-chase{background:var(--tagbg-chase); color:var(--tagfg-chase);}
+.tag-circle{background:var(--tagbg-circle); color:var(--tagfg-circle);}
+.tag-water{background:var(--tagbg-water); color:var(--tagfg-water);}
+.tag-mix{background:var(--tagbg-mix); color:var(--tagfg-mix);}
+.lvltag{font-size:.68rem; color:var(--muted); margin-left:6px;}
+.q-body{font-size:.92rem; margin:10px 0 0; color:var(--text);}
+.q-sol{display:none; margin-top:14px; border-top:1px dashed var(--line); padding-top:12px; font-size:.88rem; color:var(--muted);}
+.q-sol.show{display:block;}
+.q-sol ol{padding-left:18px;}
+.q-sol li{margin-bottom:6px;}
+.q-sol .ans{color:var(--green); font-weight:700;}
+.reveal-hint{font-size:.75rem; color:var(--amber-dim); margin-top:8px;}
+
+footer{
+  text-align:center; padding:40px 20px 60px; color:var(--muted); font-size:.78rem; border-top:1px solid var(--line); margin-top:20px;
+}
+
+nav, .stage-wrap, .concept-card, .sim-panel, .q-card, .step-card, .diagram-box,
+.field input, .field select, .type-tab, .chip, .road, .mini-road{
+  transition:background-color .3s, border-color .3s, color .3s, background .3s;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .btn, .concept-card, .q-card{transition-duration:0.01ms !important;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand"><span class="dot"></span>行程问题 · 调度台</div>
+  <div class="navlinks">
+    <a href="#concepts">讲解</a>
+    <a href="#method">分析方法</a>
+    <a href="#simulator">3D 模拟器</a>
+    <a href="#bank">题库</a>
+  </div>
+  <button id="themeToggle" class="btn btn-ghost" style="padding:8px 16px; font-size:.8rem;">◐ 黑白底板</button>
+</nav>
+
+<header class="hero">
+  <div>
+    <div class="eyebrow">● 小升初 · 行程问题专题</div>
+    <h1>把「相遇」与「追及」<br>变成看得见的<em>轨道</em></h1>
+    <p class="lead">行程问题的核心只有一件事：路程、速度、时间三者的关系。这里用可拖动的 3D 轨道模拟器，把抽象的公式变成会跑的小车和小船，配合线段图讲透方法，再用 20 道分级题库巩固练习。</p>
+    <div class="cta-row">
+      <a href="#simulator" class="btn btn-primary">打开模拟器 →</a>
+      <a href="#bank" class="btn btn-ghost">直接刷题</a>
+    </div>
+  </div>
+  <div class="stage-wrap">
+    <div class="stage">
+      <div class="road">
+        <div class="milepost" style="left:4%">甲地</div>
+        <div class="milepost" style="left:96%">乙地</div>
+        <div class="vehicle v-a" style="animation:meetDemo 4s ease-in-out infinite;">甲</div>
+        <div class="vehicle v-b" style="animation:meetDemoB 4s ease-in-out infinite;">乙</div>
+      </div>
+    </div>
+    <div class="readout" style="margin-top:8px;">
+      <div class="cell"><div class="k">类型</div><div class="v amber">相遇问题</div></div>
+      <div class="cell"><div class="k">公式</div><div class="v" style="font-size:.85rem;">和速度×时间</div></div>
+      <div class="cell"><div class="k">状态</div><div class="v green">循环演示中</div></div>
+    </div>
+  </div>
+</header>
+
+<section id="concepts">
+  <div class="section-head">
+    <div class="section-tag">01 · 讲解</div>
+    <h2>四种基本行程模型</h2>
+    <p>小升初阶段几乎所有行程题，都可以归到这四类模型里。先认清"谁在动、往哪动、同时还是有先后"，公式自然就出来了。</p>
+  </div>
+  <div class="concept-grid">
+
+    <div class="concept-card">
+      <div class="ch"><h3>相遇问题</h3><span class="formula">路程 = (速A+速B) × 时间</span></div>
+      <p>两人（车）从两地同时出发，相向而行，最终在中途碰面。关键词："同时出发""相向""相遇"。速度要相加，因为两人在共同"消灭"中间的路程。</p>
+      <div class="mini-stage">
+        <div class="mini-road">
+          <div class="mini-token v-a" style="background:var(--amber); animation:meetDemo 4s ease-in-out infinite;"></div>
+          <div class="mini-token v-b" style="background:var(--cyan); animation:meetDemoB 4s ease-in-out infinite;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="concept-card">
+      <div class="ch"><h3>追及问题</h3><span class="formula">路程差 = (速快-速慢) × 时间</span></div>
+      <p>两人同向而行，一快一慢，快的从后面追上慢的。关键词："同向""追上""领先路程"。这里速度要相减，因为差速决定了差距缩小的快慢。</p>
+      <div class="mini-stage">
+        <div class="mini-road">
+          <div class="mini-token v-b" style="background:var(--cyan); animation:chaseDemoB 4s linear infinite;"></div>
+          <div class="mini-token v-a" style="background:var(--amber); animation:chaseDemoA 4s linear infinite;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="concept-card">
+      <div class="ch"><h3>环形跑道问题</h3><span class="formula">同向:差速&nbsp;&nbsp;反向:和速</span></div>
+      <p>相当于把追及/相遇问题"卷"成一个圈。同向出发要用速度差（多跑一整圈才追上），反向出发要用速度和（合起来跑满一圈就相遇）。</p>
+      <div class="mini-stage">
+        <div class="orbit-flat">
+          <div class="orbit-oval">
+            <div class="orbit-ring"></div>
+            <div class="orbit-pivot a"><div class="orbit-token" style="background:var(--amber);"></div></div>
+            <div class="orbit-pivot b"><div class="orbit-token" style="background:var(--cyan);"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="concept-card">
+      <div class="ch"><h3>流水行船问题</h3><span class="formula">顺=船+水&nbsp;&nbsp;逆=船-水</span></div>
+      <p>船速会被水流"加速"或"顶住"。顺流时水在帮忙，速度相加；逆流时水在阻挡，速度相减。船在静水中的速度 = (顺流+逆流)÷2，水速 = (顺流-逆流)÷2。</p>
+      <div class="mini-stage">
+        <div class="water-lane" style="top:38%; height:16px;"><div class="cur"></div></div>
+        <div class="mini-token" style="background:var(--amber); top:38%; animation:boatFast 2.2s linear infinite;"></div>
+        <div class="water-lane" style="top:70%; height:16px;"><div class="cur"></div></div>
+        <div class="mini-token" style="background:var(--cyan); top:70%; animation:boatSlow 3.8s linear infinite;"></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="method">
+  <div class="section-head">
+    <div class="section-tag">02 · 分析方法</div>
+    <h2>四步解题法 + 线段图</h2>
+    <p>行程题最容易在"到底该加还是该减"上卡住。养成画线段图的习惯，几乎能避免所有方向性错误。</p>
+  </div>
+
+  <div class="method-steps">
+    <div class="step-card">
+      <div class="step-num">STEP 01</div>
+      <h4>审题定型</h4>
+      <p>圈出"同时""相向/同向""先出发""相遇/追上"等关键词，判断属于四类模型中的哪一种。</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">STEP 02</div>
+      <h4>画线段图</h4>
+      <p>用一条线段表示总路程，两个箭头表示两人的方向，标出已知的速度、时间、路程差。</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">STEP 03</div>
+      <h4>列公式</h4>
+      <p>相遇/反向环形用"和"，追及/同向环形用"差"，流水问题按顺逆分别处理。</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">STEP 04</div>
+      <h4>验算回代</h4>
+      <p>把算出的时间代回原题，检查两人走的路程加起来是否等于总路程（或差是否等于路程差）。</p>
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h4>线段图示例 · 相遇问题</h4>
+    <div class="segbar">
+      <div class="seg-a">甲走的路程（速度快，占比大）</div>
+      <div class="seg-b">乙走的路程</div>
+    </div>
+    <div class="segbar-label"><span>甲地</span><span>← 总路程（甲乙两地距离）→</span><span>乙地</span></div>
+
+    <div class="worked">
+      <h4>完整示范：甲乙两地相距 300 千米，一车以 60 千米/时从甲地出发，另一车以 40 千米/时从乙地同时出发，两车相向而行，几小时后相遇？</h4>
+      <ol>
+        <li>审题：同时出发 + 相向而行 → 相遇问题，用"和"。</li>
+        <li>画图：总路程 300 千米 = 甲走的 + 乙走的。</li>
+        <li>列式：和速度 = 60 + 40 = 100（千米/时）；相遇时间 = 300 ÷ 100 = 3（小时）。</li>
+        <li>验算：甲走 60×3=180 千米，乙走 40×3=120 千米，180+120=300 ✓ 与总路程相符。</li>
+      </ol>
+      <p>答：<span class="ans">3 小时后两车相遇。</span></p>
+    </div>
+  </div>
+</section>
+
+<section id="simulator">
+  <div class="section-head">
+    <div class="section-tag">03 · 3D 模拟器</div>
+    <h2>拖动滑块，看着公式"跑"起来</h2>
+    <p>选择模型类型，输入你题目里的数字，点击播放。轨道上的小车/小船会按真实比例移动，右侧公式面板同步显示每一步的计算过程。</p>
+  </div>
+
+  <div class="sim-grid">
+    <div class="sim-panel">
+      <div class="type-tabs">
+        <div class="type-tab active" data-type="meet">相遇</div>
+        <div class="type-tab" data-type="chase">追及</div>
+        <div class="type-tab" data-type="circle">环形</div>
+        <div class="type-tab" data-type="water">流水</div>
+      </div>
+
+      <div id="modeToggleWrap" style="display:none;">
+        <div class="mode-toggle">
+          <button class="mode-btn active" data-mode="same">同向追及</button>
+          <button class="mode-btn" data-mode="opp">反向相遇</button>
+        </div>
+      </div>
+
+      <div id="fieldsWrap"></div>
+
+      <div class="controls-row">
+        <button class="icon-btn" id="playBtn">▶ 播放</button>
+        <button class="icon-btn" id="resetBtn">⟲ 重置</button>
+      </div>
+      <label style="font-size:.75rem; color:var(--muted); display:block; margin-top:12px;">进度</label>
+      <input type="range" id="progressSlider" min="0" max="1000" value="0" style="width:100%;">
+    </div>
+
+    <div>
+      <div class="stage-wrap">
+        <div class="stage" id="simStage" style="height:230px;">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+      <div class="readout" id="readout"></div>
+      <div class="formula-panel" id="formulaPanel"></div>
+    </div>
+  </div>
+</section>
+
+<section id="bank">
+  <div class="section-head">
+    <div class="section-tag">04 · 题库</div>
+    <h2>20 道分级练习</h2>
+    <p>覆盖四类模型 + 综合挑战题，按类型和难度筛选。点击题目卡片展开完整解析，"随机抽题"可以打乱顺序做限时练习。</p>
+  </div>
+
+  <div class="bank-controls">
+    <div class="filter-group" id="typeFilters">
+      <div class="chip active" data-f="all">全部</div>
+      <div class="chip" data-f="meet">相遇</div>
+      <div class="chip" data-f="chase">追及</div>
+      <div class="chip" data-f="circle">环形</div>
+      <div class="chip" data-f="water">流水</div>
+      <div class="chip" data-f="mix">综合挑战</div>
+    </div>
+    <button class="btn btn-ghost" id="shuffleBtn" style="padding:9px 18px; font-size:.82rem;">🔀 随机抽题</button>
+  </div>
+  <div class="filter-group" id="lvlFilters" style="margin-bottom:20px;">
+    <div class="chip active" data-l="all">全部难度</div>
+    <div class="chip" data-l="基础">基础</div>
+    <div class="chip" data-l="提高">提高</div>
+    <div class="chip" data-l="挑战">挑战</div>
+  </div>
+
+  <div class="bank-list" id="bankList"></div>
+</section>
+
+<footer>
+  行程问题 · 3D 讲解与题库系统 &nbsp;·&nbsp; 制作人：Gavin &nbsp;·&nbsp; 小红书：小升初中考说 &nbsp;·&nbsp; 用于小升初教学与复习
+</footer>
+
+<script>
+/* =========================================================
+   题库数据
+========================================================= */
+const BANK = [
+  {cat:'meet', lvl:'基础', q:'甲、乙两地相距300千米，一辆汽车以每小时60千米的速度从甲地出发，另一辆汽车以每小时40千米的速度从乙地同时出发，两车相向而行，几小时后相遇？',
+   steps:['判断类型：同时出发 + 相向而行 → 相遇问题。','和速度 = 60 + 40 = 100（千米/时）。','相遇时间 = 300 ÷ 100 = 3（小时）。'], ans:'3 小时后相遇。'},
+  {cat:'meet', lvl:'基础', q:'甲、乙两地相距540米，小明和小红分别从两地同时出发相向而行，小明每分钟走70米，小红每分钟走65米，经过多少分钟两人相遇？',
+   steps:['和速度 = 70 + 65 = 135（米/分）。','相遇时间 = 540 ÷ 135 = 4（分钟）。'], ans:'4 分钟后相遇。'},
+  {cat:'meet', lvl:'提高', q:'甲、乙两车同时从相距450千米的两地相对开出，经过4.5小时相遇，已知甲车每小时行48千米，乙车每小时行多少千米？',
+   steps:['和速度 = 450 ÷ 4.5 = 100（千米/时）。','乙车速度 = 100 − 48 = 52（千米/时）。'], ans:'乙车每小时行52千米。'},
+  {cat:'meet', lvl:'提高', q:'甲、乙两地相距400米，甲、乙两人同时相向而行，甲每分钟比乙多走10米，经过5分钟两人相遇，求两人的速度各是多少？',
+   steps:['和速度 = 400 ÷ 5 = 80（米/分）。','设乙速为 x，甲速为 x+10，则 x + (x+10) = 80。','解得 x = 35，甲速 = 45。'], ans:'乙每分钟35米，甲每分钟45米。'},
+  {cat:'meet', lvl:'挑战', q:'甲、乙两站相距420千米，一列快车和一列慢车同时从两站相对开出，快车每小时行80千米，比慢车每小时多行20千米。两车开出后多长时间相遇？相遇时快车比慢车多行多少千米？',
+   steps:['慢车速度 = 80 − 20 = 60（千米/时）。','和速度 = 80 + 60 = 140（千米/时）。','相遇时间 = 420 ÷ 140 = 3（小时）。','快车行程 = 80×3 = 240 千米，慢车行程 = 60×3 = 180 千米，差 = 60 千米。'], ans:'3 小时后相遇，快车比慢车多行60千米。'},
+
+  {cat:'chase', lvl:'基础', q:'甲、乙两人同时同地同向出发，甲每分钟走90米，乙先出发2分钟，每分钟走60米，问甲出发后多少分钟追上乙？',
+   steps:['乙先出发2分钟已走的路程（领先路程）= 60×2 = 120（米）。','差速 = 90 − 60 = 30（米/分）。','追及时间 = 120 ÷ 30 = 4（分钟）。'], ans:'甲出发后4分钟追上乙。'},
+  {cat:'chase', lvl:'基础', q:'小华和小刚同时从同一地点出发同向而行，小华骑自行车每小时15千米，小刚步行每小时5千米，几小时后两人相距30千米？',
+   steps:['差速 = 15 − 5 = 10（千米/时）。','时间 = 30 ÷ 10 = 3（小时）。'], ans:'3小时后两人相距30千米。'},
+  {cat:'chase', lvl:'提高', q:'甲、乙两地相距350千米，一辆客车和一辆货车同时从甲地出发同向而行，客车每小时行75千米，货车每小时行50千米，经过多长时间客车比货车多行150千米？',
+   steps:['差速 = 75 − 50 = 25（千米/时）。','时间 = 150 ÷ 25 = 6（小时）。'], ans:'经过6小时，客车比货车多行150千米。'},
+  {cat:'chase', lvl:'提高', q:'乙先出发，速度为每小时4千米，走了1.5小时后甲开始追赶，甲的速度为每小时10千米，问甲经过多长时间追上乙？',
+   steps:['乙领先的路程 = 4×1.5 = 6（千米）。','差速 = 10 − 4 = 6（千米/时）。','追及时间 = 6 ÷ 6 = 1（小时）。'], ans:'甲经过1小时追上乙。'},
+  {cat:'chase', lvl:'挑战', q:'甲、乙两人同时从同一地点出发同向而行，甲每分钟走100米，乙每分钟走80米，出发9分钟后，甲掉头往回走（速度不变），又经过多长时间甲与乙相遇？',
+   steps:['9分钟时，甲乙之间的距离 = (100−80)×9 = 180（米）。','掉头后甲乙相向而行，和速度 = 100+80 = 180（米/分）。','再经过 180÷180 = 1（分钟）两人相遇。'], ans:'甲掉头后再经过1分钟与乙相遇。'},
+
+  {cat:'circle', lvl:'基础', q:'环形跑道长400米，甲、乙两人同时同地同向出发，甲每秒6米，乙每秒4米，多少秒后甲第一次追上乙？',
+   steps:['同向出发，用差速：6 − 4 = 2（米/秒）。','追上乙即甲比乙多跑一整圈：400 ÷ 2 = 200（秒）。'], ans:'200秒后甲第一次追上乙。'},
+  {cat:'circle', lvl:'基础', q:'环形跑道周长300米，兄妹俩同时同地反向出发，哥哥每分钟80米，妹妹每分钟70米，多少分钟后两人第一次相遇？',
+   steps:['反向出发，用和速：80 + 70 = 150（米/分）。','两人合起来跑满一圈即相遇：300 ÷ 150 = 2（分钟）。'], ans:'2分钟后两人第一次相遇。'},
+  {cat:'circle', lvl:'提高', q:'环形跑道长600米，甲每分钟100米，乙每分钟80米，两人同时同地同向出发，甲第二次追上乙需要多少分钟？',
+   steps:['差速 = 100 − 80 = 20（米/分）。','每次追上需要多跑一圈：600 ÷ 20 = 30（分钟）。','第二次追上 = 30×2 = 60（分钟）。'], ans:'甲第二次追上乙需要60分钟。'},
+  {cat:'circle', lvl:'挑战', q:'环形跑道长500米，甲、乙两人同时同地同向出发，5分钟后甲追上乙第一次，已知乙每分钟走70米，求甲的速度。',
+   steps:['5分钟追上一整圈，说明差速 = 500 ÷ 5 = 100（米/分）。','甲的速度 = 乙的速度 + 差速 = 70 + 100 = 170（米/分）。'], ans:'甲每分钟走170米。'},
+
+  {cat:'water', lvl:'基础', q:'一艘船在静水中的速度为每小时20千米，水流速度为每小时4千米，求这艘船顺流和逆流的速度各是多少？',
+   steps:['顺流速度 = 船速 + 水速 = 20 + 4 = 24（千米/时）。','逆流速度 = 船速 − 水速 = 20 − 4 = 16（千米/时）。'], ans:'顺流每小时24千米，逆流每小时16千米。'},
+  {cat:'water', lvl:'基础', q:'一艘船顺流航行84千米用了3.5小时，水流速度为每小时4千米，求这艘船在静水中的速度。',
+   steps:['顺流速度 = 84 ÷ 3.5 = 24（千米/时）。','船速 = 顺流速度 − 水速 = 24 − 4 = 20（千米/时）。'], ans:'船在静水中的速度为每小时20千米。'},
+  {cat:'water', lvl:'提高', q:'一艘船逆流航行100千米用了5小时，顺流航行同样的100千米只用了2.5小时，求船在静水中的速度和水流速度。',
+   steps:['逆流速度 = 100 ÷ 5 = 20（千米/时）。','顺流速度 = 100 ÷ 2.5 = 40（千米/时）。','船速 = (20+40)÷2 = 30（千米/时）；水速 = (40−20)÷2 = 10（千米/时）。'], ans:'船速每小时30千米，水速每小时10千米。'},
+  {cat:'water', lvl:'挑战', q:'甲、乙两码头相距126千米，一艘船从甲码头顺流而下到乙码头用6小时，从乙码头逆流而上返回甲码头用9小时，求船在静水中的速度和水流速度。',
+   steps:['顺流速度 = 126 ÷ 6 = 21（千米/时）。','逆流速度 = 126 ÷ 9 = 14（千米/时）。','船速 = (21+14)÷2 = 17.5（千米/时）；水速 = (21−14)÷2 = 3.5（千米/时）。'], ans:'船速每小时17.5千米，水速每小时3.5千米。'},
+
+  {cat:'mix', lvl:'挑战', q:'甲、乙两地相距若干千米，甲、乙两车同时相向而行，甲车每小时行70千米，乙车每小时行50千米，相遇时甲车比乙车多行100千米，求甲、乙两地的距离和相遇时间。',
+   steps:['设相遇时间为 t，则 70t − 50t = 100，即 20t = 100，t = 5（小时）。','两地距离 = (70+50)×5 = 600（千米）。'], ans:'两地相距600千米，相遇时间为5小时。'},
+  {cat:'mix', lvl:'挑战', q:'一列火车通过一座长1200米的大桥，从车头上桥到车尾离桥共用了60秒；火车全部在桥上（车头上桥后到车尾上桥前）的时间是40秒。求火车的速度和车长。',
+   steps:['设车速为 v，车长为 L：过桥路程 = 桥长+车长 → 60v = 1200 + L。','全部在桥上路程 = 桥长−车长 → 40v = 1200 − L。','两式相加：100v = 2400，v = 24（米/秒）。','代入得 L = 60×24 − 1200 = 240（米）。'], ans:'火车速度为每秒24米，车长240米。'},
+];
+
+/* =========================================================
+   题库渲染
+========================================================= */
+const catMeta = {
+  meet:{label:'相遇', cls:'tag-meet'}, chase:{label:'追及', cls:'tag-chase'},
+  circle:{label:'环形', cls:'tag-circle'}, water:{label:'流水', cls:'tag-water'}, mix:{label:'综合', cls:'tag-mix'}
+};
+let curTypeFilter='all', curLvlFilter='all';
+
+function renderBank(list){
+  const wrap = document.getElementById('bankList');
+  wrap.innerHTML='';
+  list.forEach((item, idx)=>{
+    const meta = catMeta[item.cat];
+    const card = document.createElement('div');
+    card.className='q-card';
+    card.innerHTML = `
+      <div class="qh">
+        <div><span class="qtag ${meta.cls}">${meta.label}</span><span class="lvltag">${item.lvl}</span></div>
+      </div>
+      <div class="q-body">${idx+1}. ${item.q}</div>
+      <div class="reveal-hint">点击展开 / 收起解析</div>
+      <div class="q-sol">
+        <ol>${item.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+        <p>答：<span class="ans">${item.ans}</span></p>
+      </div>
+    `;
+    card.addEventListener('click', ()=>{
+      card.querySelector('.q-sol').classList.toggle('show');
+    });
+    wrap.appendChild(card);
+  });
+}
+function applyFilters(){
+  let list = BANK.filter(b => (curTypeFilter==='all'||b.cat===curTypeFilter) && (curLvlFilter==='all'||b.lvl===curLvlFilter));
+  renderBank(list);
+}
+document.getElementById('typeFilters').addEventListener('click', e=>{
+  if(!e.target.classList.contains('chip')) return;
+  document.querySelectorAll('#typeFilters .chip').forEach(c=>c.classList.remove('active'));
+  e.target.classList.add('active');
+  curTypeFilter = e.target.dataset.f;
+  applyFilters();
+});
+document.getElementById('lvlFilters').addEventListener('click', e=>{
+  if(!e.target.classList.contains('chip')) return;
+  document.querySelectorAll('#lvlFilters .chip').forEach(c=>c.classList.remove('active'));
+  e.target.classList.add('active');
+  curLvlFilter = e.target.dataset.l;
+  applyFilters();
+});
+document.getElementById('shuffleBtn').addEventListener('click', ()=>{
+  let list = BANK.filter(b => (curTypeFilter==='all'||b.cat===curTypeFilter) && (curLvlFilter==='all'||b.lvl===curLvlFilter));
+  for(let i=list.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [list[i],list[j]]=[list[j],list[i]]; }
+  renderBank(list);
+});
+applyFilters();
+
+/* =========================================================
+   模拟器
+========================================================= */
+const sim = {
+  type:'meet',
+  mode:'same', // for circle: same|opp
+  playing:false,
+  progress:0, // 0..1
+  raf:null,
+  lastTs:null,
+  fields:{
+    meet:{distance:300, speedA:60, speedB:40},
+    chase:{head:120, speedA:90, speedB:60},
+    circle:{circumference:400, speedA:6, speedB:4},
+    water:{distance:100, boat:20, water:4}
+  }
+};
+
+const fieldDefs = {
+  meet:[
+    {key:'distance', label:'两地距离 (统一单位)', val:300},
+    {key:'speedA', label:'甲速度', val:60},
+    {key:'speedB', label:'乙速度', val:40},
+  ],
+  chase:[
+    {key:'head', label:'乙领先路程', val:120},
+    {key:'speedA', label:'甲速度（追赶者，需更快）', val:90},
+    {key:'speedB', label:'乙速度（被追者）', val:60},
+  ],
+  circle:[
+    {key:'circumference', label:'环形跑道周长', val:400},
+    {key:'speedA', label:'甲速度', val:6},
+    {key:'speedB', label:'乙速度', val:4},
+  ],
+  water:[
+    {key:'distance', label:'河道距离', val:100},
+    {key:'boat', label:'船在静水中速度', val:20},
+    {key:'water', label:'水流速度', val:4},
+  ]
+};
+
+function renderFields(){
+  const wrap = document.getElementById('fieldsWrap');
+  wrap.innerHTML='';
+  fieldDefs[sim.type].forEach(f=>{
+    const div = document.createElement('div');
+    div.className='field';
+    div.innerHTML = `<label>${f.label}</label><input type="number" data-key="${f.key}" value="${sim.fields[sim.type][f.key]}">`;
+    wrap.appendChild(div);
+  });
+  wrap.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      sim.fields[sim.type][inp.dataset.key] = parseFloat(inp.value)||0;
+      renderStage(); renderReadoutAndFormula();
+    });
+  });
+  document.getElementById('modeToggleWrap').style.display = (sim.type==='circle') ? 'block' : 'none';
+}
+
+document.querySelectorAll('.type-tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.type-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    sim.type = tab.dataset.type;
+    sim.progress=0; document.getElementById('progressSlider').value=0;
+    renderFields(); buildStageDom(); renderStage(); renderReadoutAndFormula();
+    startPlay();
+  });
+});
+document.querySelectorAll('.mode-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    sim.mode = btn.dataset.mode;
+    renderStage(); renderReadoutAndFormula();
+  });
+});
+
+function computeAnswer(){
+  const f = sim.fields[sim.type];
+  if(sim.type==='meet'){
+    const sum=f.speedA+f.speedB;
+    return {time: sum>0 ? f.distance/sum : 0, label:'相遇时间', valid: sum>0};
+  }
+  if(sim.type==='chase'){
+    const diff=f.speedA-f.speedB;
+    return {time: diff>0 ? f.head/diff : Infinity, label:'追及时间', valid: diff>0};
+  }
+  if(sim.type==='circle'){
+    if(sim.mode==='same'){
+      const diff=f.speedA-f.speedB;
+      return {time: diff>0 ? f.circumference/diff : Infinity, label:'追上所需时间', valid: diff>0};
+    } else {
+      const sum=f.speedA+f.speedB;
+      return {time: sum>0 ? f.circumference/sum : 0, label:'相遇所需时间', valid: sum>0};
+    }
+  }
+  if(sim.type==='water'){
+    const down=f.boat+f.water, up=f.boat-f.water;
+    return {downTime: down>0?f.distance/down:0, upTime: up>0?f.distance/up:Infinity, label:'顺流/逆流时间', valid: up>0};
+  }
+}
+
+function buildStageDom(){
+  const stage = document.getElementById('simStage');
+  if(sim.type==='circle'){
+    stage.innerHTML = `
+      <div class="orbit-flat" style="height:100%;">
+        <div class="orbit-oval" style="width:82%; height:74%;">
+          <div class="orbit-ring"></div>
+          <div class="orbit-pivot" id="pivotA" style="animation:none;"><div class="orbit-token" style="background:var(--amber); display:flex;align-items:center;justify-content:center;font-size:.55rem;color:var(--chip-text-a);font-weight:700;">甲</div></div>
+          <div class="orbit-pivot" id="pivotB" style="animation:none;"><div class="orbit-token" style="background:var(--cyan); display:flex;align-items:center;justify-content:center;font-size:.55rem;color:var(--chip-text-b);font-weight:700;">乙</div></div>
+        </div>
+      </div>`;
+  } else if(sim.type==='water'){
+    stage.innerHTML = `
+      <div class="road river" style="top:26%; height:50px;">
+        <div class="milepost" style="left:4%">起点</div>
+        <div class="milepost" style="left:96%">终点</div>
+        <div class="vehicle v-a" id="boatDown" style="left:4%;">顺</div>
+      </div>
+      <div class="road river" style="top:66%; height:50px;">
+        <div class="vehicle v-b" id="boatUp" style="left:96%;">逆</div>
+      </div>`;
+  } else {
+    stage.innerHTML = `
+      <div class="road" style="top:38%; height:60px;">
+        <div class="milepost" style="left:4%">起点</div>
+        <div class="milepost" style="left:96%">终点</div>
+        <div class="vehicle v-a" id="carA" style="left:4%;">甲</div>
+        <div class="vehicle v-b" id="carB" style="left:96%;">乙</div>
+      </div>`;
+  }
+}
+
+function renderStage(){
+  const f = sim.fields[sim.type];
+  const t = sim.progress; // 0..1 progress along the "story"
+  if(sim.type==='meet'){
+    const ans = computeAnswer();
+    const simT = t*ans.time*1.15;
+    let posA = ans.valid ? Math.min(f.speedA*simT, f.distance) : 0;
+    let posB = ans.valid ? Math.max(f.distance - f.speedB*simT, 0) : f.distance;
+    const pctA = f.distance>0 ? (posA/f.distance)*90+4 : 4;
+    const pctB = f.distance>0 ? (posB/f.distance)*90+4 : 94;
+    document.getElementById('carA').style.left = pctA+'%';
+    document.getElementById('carB').style.left = pctB+'%';
+  }
+  else if(sim.type==='chase'){
+    const ans = computeAnswer();
+    const totalT = ans.valid ? ans.time*1.3 : 6;
+    const simT = t*totalT;
+    const posA = f.speedA*simT;
+    const posB = f.head + f.speedB*simT;
+    const span = Math.max(posB, posA, f.head, 1)*1.05;
+    document.getElementById('carA').style.left = Math.min(4+ (posA/span)*90, 96)+'%';
+    document.getElementById('carB').style.left = Math.min(4+ (posB/span)*90, 96)+'%';
+  }
+  else if(sim.type==='circle'){
+    const ans = computeAnswer();
+    const totalT = ans.valid ? ans.time*1.15 : 8;
+    const simT = t*totalT;
+    const angA = (f.speedA*simT / f.circumference) * 360;
+    const dir = sim.mode==='opp' ? -1 : 1;
+    const angB = (f.speedB*simT / f.circumference) * 360 * dir;
+    document.getElementById('pivotA').style.transform = `rotate(${angA}deg)`;
+    document.getElementById('pivotB').style.transform = `rotate(${angB}deg)`;
+  }
+  else if(sim.type==='water'){
+    const ans = computeAnswer();
+    const maxTime = Math.max(ans.downTime, isFinite(ans.upTime)?ans.upTime:ans.downTime, 0.001)*1.15;
+    const simT = t*maxTime;
+    const posDown = Math.min((f.boat+f.water)*simT, f.distance);
+    const posUp = Math.min((f.boat-f.water)*simT, f.distance);
+    document.getElementById('boatDown').style.left = (4 + (posDown/f.distance)*90)+'%';
+    document.getElementById('boatUp').style.left = (96 - (posUp/f.distance)*90)+'%';
+  }
+}
+
+function renderReadoutAndFormula(){
+  const f = sim.fields[sim.type];
+  const readout = document.getElementById('readout');
+  const fp = document.getElementById('formulaPanel');
+  const ans = computeAnswer();
+
+  if(sim.type==='meet'){
+    readout.innerHTML = `
+      <div class="cell"><div class="k">和速度</div><div class="v amber">${(f.speedA+f.speedB).toFixed(1)}</div></div>
+      <div class="cell"><div class="k">总路程</div><div class="v cyan">${f.distance}</div></div>
+      <div class="cell"><div class="k">相遇时间</div><div class="v green">${ans.valid? ans.time.toFixed(2):'—'}</div></div>`;
+    fp.innerHTML = `路程 = (速A + 速B) × 时间<br>
+      <span class="fa">${f.speedA}</span> + <span class="fc">${f.speedB}</span> = ${(f.speedA+f.speedB).toFixed(1)}<br>
+      相遇时间 = ${f.distance} ÷ ${(f.speedA+f.speedB).toFixed(1)} = <span class="fg">${ans.valid?ans.time.toFixed(2):'无解'}</span>`;
+  }
+  else if(sim.type==='chase'){
+    readout.innerHTML = `
+      <div class="cell"><div class="k">差速度</div><div class="v amber">${(f.speedA-f.speedB).toFixed(1)}</div></div>
+      <div class="cell"><div class="k">领先路程</div><div class="v cyan">${f.head}</div></div>
+      <div class="cell"><div class="k">追及时间</div><div class="v green">${ans.valid? ans.time.toFixed(2):'需甲更快'}</div></div>`;
+    fp.innerHTML = `路程差 = (速快 − 速慢) × 时间<br>
+      差速度 = <span class="fa">${f.speedA}</span> − <span class="fc">${f.speedB}</span> = ${(f.speedA-f.speedB).toFixed(1)}<br>
+      追及时间 = ${f.head} ÷ ${(f.speedA-f.speedB).toFixed(1)} = <span class="fg">${ans.valid?ans.time.toFixed(2):'无解（甲需比乙快）'}</span>`;
+  }
+  else if(sim.type==='circle'){
+    const isSame = sim.mode==='same';
+    readout.innerHTML = `
+      <div class="cell"><div class="k">${isSame?'差速度':'和速度'}</div><div class="v amber">${isSame? (f.speedA-f.speedB).toFixed(1) : (f.speedA+f.speedB).toFixed(1)}</div></div>
+      <div class="cell"><div class="k">周长</div><div class="v cyan">${f.circumference}</div></div>
+      <div class="cell"><div class="k">${ans.label}</div><div class="v green">${ans.valid? ans.time.toFixed(2):'需甲更快'}</div></div>`;
+    fp.innerHTML = isSame
+      ? `同向出发用差速：<span class="fa">${f.speedA}</span> − <span class="fc">${f.speedB}</span> = ${(f.speedA-f.speedB).toFixed(1)}<br>
+         追及时间 = ${f.circumference} ÷ ${(f.speedA-f.speedB).toFixed(1)} = <span class="fg">${ans.valid?ans.time.toFixed(2):'无解'}</span>`
+      : `反向出发用和速：<span class="fa">${f.speedA}</span> + <span class="fc">${f.speedB}</span> = ${(f.speedA+f.speedB).toFixed(1)}<br>
+         相遇时间 = ${f.circumference} ÷ ${(f.speedA+f.speedB).toFixed(1)} = <span class="fg">${ans.time.toFixed(2)}</span>`;
+  }
+  else if(sim.type==='water'){
+    readout.innerHTML = `
+      <div class="cell"><div class="k">顺流速度</div><div class="v amber">${(f.boat+f.water).toFixed(1)}</div></div>
+      <div class="cell"><div class="k">逆流速度</div><div class="v cyan">${(f.boat-f.water).toFixed(1)}</div></div>
+      <div class="cell"><div class="k">顺/逆时间</div><div class="v green">${ans.downTime.toFixed(2)} / ${isFinite(ans.upTime)?ans.upTime.toFixed(2):'—'}</div></div>`;
+    fp.innerHTML = `顺流速度 = 船速 + 水速 = <span class="fa">${f.boat}</span> + ${f.water} = ${(f.boat+f.water).toFixed(1)}<br>
+      逆流速度 = 船速 − 水速 = ${f.boat} − ${f.water} = ${(f.boat-f.water).toFixed(1)}<br>
+      顺流时间 = ${f.distance} ÷ ${(f.boat+f.water).toFixed(1)} = <span class="fg">${ans.downTime.toFixed(2)}</span>　
+      逆流时间 = ${f.distance} ÷ ${(f.boat-f.water).toFixed(1)} = <span class="fg">${isFinite(ans.upTime)?ans.upTime.toFixed(2):'无解（水速≥船速）'}</span>`;
+  }
+}
+
+/* playback loop */
+function stopPlay(){
+  sim.playing=false;
+  document.getElementById('playBtn').textContent='▶ 播放';
+  if(sim.raf) cancelAnimationFrame(sim.raf);
+  sim.lastTs=null;
+}
+function startPlay(){
+  sim.playing=true;
+  document.getElementById('playBtn').textContent='⏸ 暂停';
+  sim.lastTs=null;
+  if(sim.raf) cancelAnimationFrame(sim.raf);
+  sim.raf = requestAnimationFrame(stepFrame);
+}
+function stepFrame(ts){
+  if(!sim.lastTs) sim.lastTs=ts;
+  const dt = (ts-sim.lastTs)/1000;
+  sim.lastTs=ts;
+  const CYCLE = 4.5; // seconds for a full playback cycle
+  sim.progress += dt/CYCLE;
+  if(sim.progress>=1){ sim.progress = 0; } // loop back to the start, like the other demos on this page
+  document.getElementById('progressSlider').value = Math.round(sim.progress*1000);
+  renderStage();
+  if(sim.playing){
+    sim.raf = requestAnimationFrame(stepFrame);
+  }
+}
+document.getElementById('playBtn').addEventListener('click', ()=>{
+  if(sim.playing){ stopPlay(); return; }
+  startPlay();
+});
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  stopPlay(); sim.progress=0; document.getElementById('progressSlider').value=0;
+  renderStage(); renderReadoutAndFormula();
+});
+document.getElementById('progressSlider').addEventListener('input', (e)=>{
+  stopPlay();
+  sim.progress = parseInt(e.target.value)/1000;
+  renderStage();
+});
+
+/* theme toggle */
+document.getElementById('themeToggle').addEventListener('click', ()=>{
+  document.body.classList.toggle('theme-mono');
+  const on = document.body.classList.contains('theme-mono');
+  document.getElementById('themeToggle').textContent = on ? '◑ 彩色底板' : '◐ 黑白底板';
+});
+
+/* init */
+renderFields();
+buildStageDom();
+renderStage();
+renderReadoutAndFormula();
+startPlay();
+</script>
+</body>
+</html>
